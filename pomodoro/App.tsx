@@ -6,15 +6,29 @@ import Circles from "./components/Circles";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 
+const FOCUS_TIME = 1_5;
+const SHORT_BREAK = 3;
+const LONG_BREAK = 1_2;
+
 export default function App() {
-  const [time, setTime] = useState(1_500);
+  const [time, setTime] = useState(FOCUS_TIME);
   const [isRunning, setIsRunning] = useState(false);
+  const [completed, setCompleted] = useState(0);
+
+  const currenttCycle = completed % 4;
 
   useEffect(() => {
     if (isRunning) {
       const ref = setInterval(() => {
-        console.log("oi");
-        setTime((currentValue) => currentValue - 1);
+        console.log("tick");
+        setTime((currentValue) => {
+          if (currentValue > 0) {
+            return currentValue - 1;
+          } else {
+            setCompleted((curr) => curr + 1);
+            return SHORT_BREAK;
+          }
+        });
       }, 1_000);
 
       return () => {
@@ -43,7 +57,12 @@ export default function App() {
         onPause={handlePause}
         isRunning={isRunning}
       />
-      <Circles />
+      <Circles
+        firstCompleted={completed > 0}
+        secondCompleted={completed > 1}
+        thirdCompleted={completed > 2}
+        fourthCompleted={completed > 3}
+      />
       <Text style={styles.text}>Focus time</Text>
       <Ionicons name="help-circle" size={24} color="#fff" />
       <StatusBar style="light" />
