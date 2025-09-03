@@ -16,6 +16,11 @@ export default function App() {
         console.log("oi");
         setTime((currentValue) => currentValue - 1);
       }, 1_000);
+
+      return () => {
+        console.log("limpando o setInterval");
+        clearInterval(ref);
+      };
     }
   }, [isRunning]);
 
@@ -23,12 +28,21 @@ export default function App() {
     setIsRunning(true);
   }
 
+  function handlePause() {
+    setIsRunning(false);
+  }
+
   function handleNext() {}
 
   return (
     <View style={styles.container}>
       <Timer time={time.toString()} />
-      <Controls onStart={handleStart} onNext={handleNext} />
+      <Controls
+        onStart={handleStart}
+        onNext={handleNext}
+        onPause={handlePause}
+        isRunning={isRunning}
+      />
       <Circles />
       <Text style={styles.text}>Focus time</Text>
       <Ionicons name="help-circle" size={24} color="#fff" />
