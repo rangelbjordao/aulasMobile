@@ -1,30 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface ControlsProp {
   onStart: () => void;
   onPause: () => void;
   onNext: () => void;
-  isRunning?: boolean;
+  isRunning: boolean;
 }
 
 const Controls = ({ onStart, onNext, onPause, isRunning }: ControlsProp) => {
   return (
     <View style={styles.container}>
-      <Ionicons
-        name={isRunning ? "pause-circle" : "play-circle"}
-        size={64}
-        color="#fff"
-        style={{ marginLeft: 40 }}
-        onPress={isRunning ? onPause : onStart}
-      />
-
-      <Ionicons
-        name="play-skip-forward"
-        size={32}
-        color="#fff"
-        onPress={onNext}
-      />
+      <TouchableOpacity onPress={isRunning ? onPause : onStart}>
+        <Ionicons
+          name={isRunning ? "pause-circle" : "play-circle"}
+          size={64}
+          color="#fff"
+          style={{ marginLeft: 40 }}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={onNext}>
+        <Ionicons name="play-skip-forward" size={32} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 };

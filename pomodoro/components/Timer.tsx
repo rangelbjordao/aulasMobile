@@ -1,13 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
+import { formatTime } from "../utils/formatTime";
 
 interface TimerProps {
-  time: string;
+  time: number;
 }
 
 const Timer = ({ time }: TimerProps) => {
   return (
     <View style={styles.circle}>
-      <Text style={styles.text}>{time}</Text>
+      <Text style={styles.text}>{formatTime(time)}</Text>
     </View>
   );
 };

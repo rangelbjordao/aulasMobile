@@ -36,7 +36,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Timer time={time.toString()} />
+      <Timer time={time} />
       <Controls
         onStart={handleStart}
         onNext={handleNext}
