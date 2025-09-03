@@ -10,12 +10,23 @@ const FOCUS_TIME = 1_5;
 const SHORT_BREAK = 3;
 const LONG_BREAK = 1_2;
 
+const CYCLES = [
+  FOCUS_TIME,
+  SHORT_BREAK,
+  FOCUS_TIME,
+  SHORT_BREAK,
+  FOCUS_TIME,
+  SHORT_BREAK,
+  FOCUS_TIME,
+  LONG_BREAK,
+];
+
 export default function App() {
   const [time, setTime] = useState(FOCUS_TIME);
   const [isRunning, setIsRunning] = useState(false);
   const [completed, setCompleted] = useState(0);
 
-  const currenttCycle = completed % 4;
+  const currentCycle = completed % 8;
 
   useEffect(() => {
     if (isRunning) {
@@ -25,8 +36,12 @@ export default function App() {
           if (currentValue > 0) {
             return currentValue - 1;
           } else {
-            setCompleted((curr) => curr + 1);
-            return SHORT_BREAK;
+            setCompleted((curr) => {
+              const cycle = curr % 8;
+              setTime(CYCLES[cycle === 7 ? 0 : cycle + 1]);
+              return curr + 1;
+            });
+            return currentValue;
           }
         });
       }, 1_000);
@@ -58,10 +73,10 @@ export default function App() {
         isRunning={isRunning}
       />
       <Circles
-        firstCompleted={completed > 0}
-        secondCompleted={completed > 1}
-        thirdCompleted={completed > 2}
-        fourthCompleted={completed > 3}
+        firstCompleted={currentCycle > 0}
+        secondCompleted={currentCycle > 2}
+        thirdCompleted={currentCycle > 4}
+        fourthCompleted={currentCycle > 6}
       />
       <Text style={styles.text}>Focus time</Text>
       <Ionicons name="help-circle" size={24} color="#fff" />
