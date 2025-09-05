@@ -63,8 +63,20 @@ export default function App() {
 
   function handleNext() {}
 
+  let bgColor, cycleText;
+  if (currentCycle % 2 === 0) {
+    bgColor = styles.focusTime;
+    cycleText = "Focus time";
+  } else if (currentCycle % 7 === 0) {
+    bgColor = styles.longBreak;
+    cycleText = "Long Break";
+  } else {
+    bgColor = styles.shortBreak;
+    cycleText = "Break";
+  }
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, bgColor]}>
       <Timer time={time} />
       <Controls
         onStart={handleStart}
@@ -78,7 +90,7 @@ export default function App() {
         thirdCompleted={currentCycle > 4}
         fourthCompleted={currentCycle > 6}
       />
-      <Text style={styles.text}>Focus time</Text>
+      <Text style={styles.text}>{cycleText}</Text>
       <Ionicons name="help-circle" size={24} color="#fff" />
       <StatusBar style="light" />
     </View>
@@ -91,6 +103,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#BA4949",
     alignItems: "center",
     justifyContent: "center",
+  },
+  focusTime: {
+    backgroundColor: "#BA4949",
+  },
+  shortBreak: {
+    backgroundColor: "#38858A",
+  },
+  longBreak: {
+    backgroundColor: "#397097",
   },
   text: {
     color: "#fff",
