@@ -21,29 +21,52 @@ const CYCLES = [
   LONG_BREAK,
 ];
 
-export default function App() {
-  const [time, setTime] = useState(FOCUS_TIME);
-  const [isRunning, setIsRunning] = useState(false);
-  const [completed, setCompleted] = useState(0);
+interface PomodoroCycle {
+  time: number;
+  completed: number;
+}
 
-  const currentCycle = completed % 8;
+export default function App() {
+  const [cycle, setCycle] = useState<PomodoroCycle>({
+    time: FOCUS_TIME,
+    completed: 0,
+  });
+  const [isRunning, setIsRunning] = useState(false);
+
+  const currentCycle = cycle.completed % 8;
 
   useEffect(() => {
     if (isRunning) {
       const ref = setInterval(() => {
         console.log("tick");
-        setTime((currentValue) => {
-          if (currentValue > 0) {
-            return currentValue - 1;
+
+        setCycle((currentValue: PomodoroCycle) => {
+          if (currentValue.time > 0) {
+            return {
+              ...currentValue,
+              time: currentValue.time,
+            };
           } else {
-            setCompleted((curr) => {
-              const cycle = curr % 8;
-              setTime(CYCLES[cycle === 7 ? 0 : cycle + 1]);
-              return curr + 1;
-            });
-            return currentValue;
+            const cycle = currentValue.completed % 8;
+
+            return {
+              time: CYCLES[cycle === 7 ? 0 : cycle + 1],
+              completed: currentValue.completed + 1,
+            };
           }
         });
+        // setTime((currentValue) => {
+        //   if (currentValue > 0) {
+        //     return currentValue - 1;
+        //   } else {
+        //     setCompleted((curr) => {
+        //       const cycle = curr % 8;
+        //       setTime(CYCLES[cycle === 7 ? 0 : cycle + 1]);
+        //       return curr + 1;
+        //     });
+        //     return currentValue;
+        //   }
+        // });
       }, 1_000);
 
       return () => {
@@ -61,7 +84,16 @@ export default function App() {
     setIsRunning(false);
   }
 
-  function handleNext() {}
+  function handleNext() {
+    setCycle((currentValue) => {
+      const cycle = currentValue.completed % 8;
+
+      return {
+        completed: currentValue.completed + 1,
+        time: CYCLES[cycle === 7 ? 0 : cycle + 1],
+      };
+    });
+  }
 
   let bgColor, cycleText;
   if (currentCycle % 2 === 0) {
@@ -77,7 +109,7 @@ export default function App() {
 
   return (
     <View style={[styles.container, bgColor]}>
-      <Timer time={time} />
+      <Timer time={cycle.time} />
       <Controls
         onStart={handleStart}
         onNext={handleNext}
