@@ -4,7 +4,7 @@ import Timer from "./components/Timer";
 import Controls from "./components/Controls";
 import Circles from "./components/Circles";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 const FOCUS_TIME = 1_5;
 const SHORT_BREAK = 3;
@@ -26,12 +26,46 @@ interface PomodoroCycle {
   completed: number;
 }
 
+const FIRTS_CYCLE = {
+  time: FOCUS_TIME,
+  completed: 0,
+};
+
 export default function App() {
-  const [cycle, setCycle] = useState<PomodoroCycle>({
-    time: FOCUS_TIME,
-    completed: 0,
-  });
+  const [cycle, setCycle] = useState<PomodoroCycle>(FIRTS_CYCLE);
   const [isRunning, setIsRunning] = useState(false);
+
+  function reduceCycle(
+    prevState: PomodoroCycle,
+    action: string
+  ): PomodoroCycle {
+    function computedAction() {
+      if (action === "decreaseTime" && prevState.time === 0) {
+        return "nextCycle";
+      }
+      return action;
+    }
+
+    const computedActions = computedAction();
+
+    if (action === "decreaseTime") {
+      return {
+        ...prevState,
+        time: prevState.time - 1,
+      };
+    } else if (action === "nextCycle") {
+      const cycle = prevState.completed % 8;
+
+      return {
+        time: CYCLES[cycle === 7 ? 0 : cycle + 1],
+        completed: prevState.completed - 1,
+      };
+    } else {
+      throw Error("Nao tem");
+    }
+  }
+
+  const [state, dispatch] = useReducer(reduceCycle, FIRTS_CYCLE);
 
   const currentCycle = cycle.completed % 8;
 
@@ -40,33 +74,7 @@ export default function App() {
       const ref = setInterval(() => {
         console.log("tick");
 
-        setCycle((currentValue: PomodoroCycle) => {
-          if (currentValue.time > 0) {
-            return {
-              ...currentValue,
-              time: currentValue.time,
-            };
-          } else {
-            const cycle = currentValue.completed % 8;
-
-            return {
-              time: CYCLES[cycle === 7 ? 0 : cycle + 1],
-              completed: currentValue.completed + 1,
-            };
-          }
-        });
-        // setTime((currentValue) => {
-        //   if (currentValue > 0) {
-        //     return currentValue - 1;
-        //   } else {
-        //     setCompleted((curr) => {
-        //       const cycle = curr % 8;
-        //       setTime(CYCLES[cycle === 7 ? 0 : cycle + 1]);
-        //       return curr + 1;
-        //     });
-        //     return currentValue;
-        //   }
-        // });
+        dispatch("decreaseTime");
       }, 1_000);
 
       return () => {
@@ -85,14 +93,7 @@ export default function App() {
   }
 
   function handleNext() {
-    setCycle((currentValue) => {
-      const cycle = currentValue.completed % 8;
-
-      return {
-        completed: currentValue.completed + 1,
-        time: CYCLES[cycle === 7 ? 0 : cycle + 1],
-      };
-    });
+    dispatch("nextCycle");
   }
 
   let bgColor, cycleText;
