@@ -6,3 +6,12 @@ export const fetchUsers = async () => {
   );
   return response.data; //Retorna os dados (array de usuarios)
 };
+
+//Funçao para criar novo usuário
+export const createUser = async (newUser) => {
+  const response = axios.post(
+    "https://698ddafbb79d1c928ed6c701.mockapi.io/users",
+    newUser,
+  );
+  return response.data;
+};
