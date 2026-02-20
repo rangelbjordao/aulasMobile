@@ -1,35 +1,45 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import {auth} from "../services/firebaseConfig"
-import { useRouter } from 'expo-router';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebaseConfig";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function CadastroScreen() {
   // Estados para armazenar os valores digitados
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
 
-  const router = useRouter()//Hook de navegação
+  const router = useRouter(); //Hook de navegação
 
   // Função para simular o envio do formulário
   const handleCadastro = () => {
     if (!nome || !email || !senha) {
-      Alert.alert('Atenção', 'Preencha todos os campos!');
+      Alert.alert("Atenção", "Preencha todos os campos!");
       return;
     }
-    Alert.alert('Sucesso', `Usuário ${nome} cadastrado com sucesso!`);
-    createUserWithEmailAndPassword(auth,email,senha)
-      .then((userCredential)=>{
+    Alert.alert("Sucesso", `Usuário ${nome} cadastrado com sucesso!`);
+    createUserWithEmailAndPassword(auth, email, senha)
+      .then(async (userCredential) => {
         const user = userCredential.user;
-        console.log(user)
-        router.replace("/Home")
+        console.log(user);
+        // Salvando o usuario no AsyncStorage
+        await AsyncStorage.setItem("@user", JSON.stringify(user));
+        router.replace("/Home");
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
-        console.log(errorCode+" "+errorMessage)
-    })
+        console.log(errorCode + " " + errorMessage);
+      });
   };
 
   return (
@@ -78,36 +88,36 @@ export default function CadastroScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
-    justifyContent: 'center',
+    backgroundColor: "#121212",
+    justifyContent: "center",
     padding: 20,
   },
   titulo: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
     marginBottom: 30,
-    textAlign: 'center',
+    textAlign: "center",
   },
   input: {
-    backgroundColor: '#1E1E1E',
-    color: '#fff',
+    backgroundColor: "#1E1E1E",
+    color: "#fff",
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: "#333",
   },
   botao: {
-    backgroundColor: '#00B37E',
+    backgroundColor: "#00B37E",
     padding: 15,
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   textoBotao: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

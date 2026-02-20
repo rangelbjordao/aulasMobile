@@ -1,27 +1,69 @@
-import { Link } from 'expo-router';
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Link, useRouter } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { auth } from "../services/firebaseConfig";
 
 export default function LoginScreen() {
   // Estados para armazenar os valores digitados
 
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const verificarUsuarioLogado = async () => {
+      try {
+        const usuarioSalvo = await AsyncStorage.getItem("@user");
+        if (usuarioSalvo) {
+          router.replace("/Home");
+        }
+      } catch (error) {
+        console.log("Erro ao verificar login:", error);
+      }
+    };
+    verificarUsuarioLogado(); // Chama a funcao para verficar se o usuario esta logado
+  }, []);
 
   // Função para simular o envio do formulário
-  const handleLogin= () => {
-    if ( !email || !senha) {
-      Alert.alert('Atenção', 'Preencha todos os campos!');
+  const handleLogin = () => {
+    if (!email || !senha) {
+      Alert.alert("Atenção", "Preencha todos os campos!");
       return;
     }
-    Alert.alert('Sucesso ao logar', `Usuário logado com sucesso!`);
-    // Aqui você poderia fazer um fetch/axios para enviar ao backend
+    signInWithEmailAndPassword(auth, email, senha)
+      .then(async (userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        // Salvando o usuario no AsyncStorage
+        await AsyncStorage.setItem("@user", JSON.stringify(user));
+        // Redirecionar para a tela home
+        router.replace("/Home");
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode, errorMessage);
+        Alert.alert(
+          "ATENÇÃO",
+          "Credenciais inválidas, verifique email e senha",
+          [{ text: "OK" }],
+        );
+      });
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Realizar login</Text>
-
 
       {/* Campo Email */}
       <TextInput
@@ -49,7 +91,12 @@ export default function LoginScreen() {
         <Text style={styles.textoBotao}>Login</Text>
       </TouchableOpacity>
 
-      <Link href="CadastrarScreen" style={{marginTop:20,color:'white',marginLeft:150}}>Cadastre-se</Link>
+      <Link
+        href="CadastrarScreen"
+        style={{ marginTop: 20, color: "white", marginLeft: 150 }}
+      >
+        Cadastre-se
+      </Link>
     </View>
   );
 }
@@ -58,36 +105,36 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
-    justifyContent: 'center',
+    backgroundColor: "#121212",
+    justifyContent: "center",
     padding: 20,
   },
   titulo: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
     marginBottom: 30,
-    textAlign: 'center',
+    textAlign: "center",
   },
   input: {
-    backgroundColor: '#1E1E1E',
-    color: '#fff',
+    backgroundColor: "#1E1E1E",
+    color: "#fff",
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: "#333",
   },
   botao: {
-    backgroundColor: '#00B37E',
+    backgroundColor: "#00B37E",
     padding: 15,
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   textoBotao: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
