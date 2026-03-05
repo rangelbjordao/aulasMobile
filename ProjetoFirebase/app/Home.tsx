@@ -10,17 +10,35 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { auth, collection, addDoc, db } from "../services/firebaseConfig";
+import { auth } from "../services/firebaseConfig";
 import { deleteUser } from "firebase/auth";
 import ItemLoja from "./components/ItemLoja";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { salvarProdutoUsuario } from "../services/userDataService";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+
+type Produto = {
+  id: string;
+  nomeProduto: string;
+};
 
 export default function Home() {
   //Estado para armazenar o nome do produto
   const [nomeProduto, setNomeProduto] = useState("");
 
+  // Estado para armazernar os produtos vindo do Firestore
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+
   const router = useRouter(); //Hook de navegação
+
+  /* Executa em tempo real a colecao de produtos sera usuario logado
+  Sempre que algo muda no firestore, a lista é atualizada automaticamente
+  na tela */
+
+  useEffect(() => {
+    console.log("Executando")
+  }, []);
 
   const realizarLogoff = async () => {
     await AsyncStorage.removeItem("@user"); //Limpa o usuário do Async
@@ -52,16 +70,28 @@ export default function Home() {
             }
           },
         },
-      ],
+      ]
     );
   };
 
   const salvarProduto = async () => {
+    //Evitar gravações do db de itens vazios
+    if (!nomeProduto.trim()) {
+      Alert.alert("Atenção", "Digite o nome do produto.");
+      return;
+    }
+    //Garantir o uso do uid do usuário autenticado;
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("Erro", "Nenhum usuário autenticado.");
+      return;
+    }
+
     try {
-      const docRef = await addDoc(collection(db, "produtos"), {
-        nomeProduto: nomeProduto,
-        isChecked: false,
-      });
+      //Salvar em usario/{uid}/produtos
+      await salvarProdutoUsuario(user.uid, nomeProduto.trim());
+      Alert.alert("Sucesso", "Produto salvo com sucesso!");
+      setNomeProduto("");
       console.log("Produto Salvo com Sucesso!");
     } catch (error) {
       console.log("Error ao salvar produto:" + error);
@@ -82,10 +112,12 @@ export default function Home() {
           title="Alterar Senha"
           onPress={() => router.push("/AlterarSenhaScreen")}
         />
-        <ItemLoja />
+        <ItemLoja nomeProduto="mouse gamer" />
+
         <TextInput
           placeholder="Digite o nome do Produto"
           style={styles.input}
+          value={nomeProduto}
           onChangeText={(value) => setNomeProduto(value)}
           onSubmitEditing={salvarProduto}
         />

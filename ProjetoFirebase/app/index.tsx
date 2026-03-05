@@ -1,16 +1,21 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import React, { useEffect, useState } from "react";
+import { Link } from "expo-router";
+import React, { useState, useEffect } from "react";
 import {
-  Alert,
-  StyleSheet,
+  View,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  StyleSheet,
+  Alert,
 } from "react-native";
 import { auth } from "../services/firebaseConfig";
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { registrarUltimoLogin } from "../services/userDataService";
 
 export default function LoginScreen() {
   // Estados para armazenar os valores digitados
@@ -18,8 +23,9 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  const router = useRouter();
+  const router = useRouter(); //Hook de navegação
 
+  //Verifica se há persistência no Async Storage
   useEffect(() => {
     const verificarUsuarioLogado = async () => {
       try {
@@ -28,10 +34,10 @@ export default function LoginScreen() {
           router.replace("/Home");
         }
       } catch (error) {
-        console.log("Erro ao verificar login:", error);
+        console.log("Error ao verificar login: ", error);
       }
     };
-    verificarUsuarioLogado(); // Chama a funcao para verficar se o usuario esta logado
+    verificarUsuarioLogado(); //Chama a função para verificar se o usuário está logado.
   }, []);
 
   // Função para simular o envio do formulário
@@ -44,9 +50,12 @@ export default function LoginScreen() {
       .then(async (userCredential) => {
         // Signed in
         const user = userCredential.user;
-        // Salvando o usuario no AsyncStorage
+        //Atualiza o campo de último login no doc do usuario/{uid}
+        await registrarUltimoLogin(user.uid, user.email);
+
+        //Salvando o usuário no AsyncStorage
         await AsyncStorage.setItem("@user", JSON.stringify(user));
-        // Redirecionar para a tela home
+        //Redericionar para a tela home
         router.replace("/Home");
       })
       .catch((error) => {
@@ -55,9 +64,24 @@ export default function LoginScreen() {
         console.log(errorCode, errorMessage);
         Alert.alert(
           "ATENÇÃO",
-          "Credenciais inválidas, verifique email e senha",
-          [{ text: "OK" }],
+          "Credenciais Inválidas, verifique e-mail e senha:",
+          [{ text: "OK" }]
         );
+      });
+  };
+
+  const esqueceuSenha = () => {
+    if (!email) {
+      Alert.alert("Error", "Digite seu e-mail para recuperar a senha.");
+    }
+    //Função para redefinir a senha do usuário
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        Alert.alert("Sucesso", "E-mail de redefinição enviado!");
+      })
+      .catch((error) => {
+        console.log("Error ao enviado e-mail de redefinição", error.message);
+        Alert.alert("Error", "E-mail de redefinição NÃO enviado.");
       });
   };
 
@@ -97,6 +121,12 @@ export default function LoginScreen() {
       >
         Cadastre-se
       </Link>
+
+      <TouchableOpacity onPress={esqueceuSenha}>
+        <Text style={{ marginTop: 20, color: "white", marginLeft: 130 }}>
+          Esqueceu a senha
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
