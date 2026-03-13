@@ -48,8 +48,8 @@ app.post("/login", (req, res) => {
 
       // Configuracoes adicionais
       {
-        expiresIn: "1h", // Token expira em uma hora
-      }
+        expiresIn: "120s", // Token expira em uma hora
+      },
     );
     // Enviado o token para o cliente
     // o cliente guarda o token(Async Storage)
