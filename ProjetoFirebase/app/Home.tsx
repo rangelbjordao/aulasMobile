@@ -27,7 +27,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, db } from "../services/firebaseConfig";
 import { salvarProdutoUsuario } from "../services/userDataService";
-import ItemLoja from "./components/ItemLoja";
+import ItemLoja from "../src/components/ItemLoja";
 
 type Produto = {
   id: string;

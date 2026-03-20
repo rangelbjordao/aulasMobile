@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
 } from "react-native";
 import { auth } from "../services/firebaseConfig";
 import {
@@ -16,14 +17,18 @@ import {
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { registrarUltimoLogin } from "../services/userDataService";
+import { useTranslation } from "react-i18next";
+import i18n from "../src/services/i18n";
 
 export default function LoginScreen() {
   // Estados para armazenar os valores digitados
-
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
   const router = useRouter(); //Hook de navegação
+
+  //Hook do i18next que fornece a função "t" para buscar tradução
+  const { t } = useTranslation();
 
   //Verifica se há persistência no Async Storage
   useEffect(() => {
@@ -65,7 +70,7 @@ export default function LoginScreen() {
         Alert.alert(
           "ATENÇÃO",
           "Credenciais Inválidas, verifique e-mail e senha:",
-          [{ text: "OK" }]
+          [{ text: "OK" }],
         );
       });
   };
@@ -85,9 +90,14 @@ export default function LoginScreen() {
       });
   };
 
+  // Funcao para alterar o idioma
+  const mudarIdioma = (Lang: string) => {
+    i18n.changeLanguage(Lang);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Realizar login</Text>
+      <Text style={styles.titulo}>{t("welcome")}</Text>
 
       {/* Campo Email */}
       <TextInput
@@ -103,7 +113,7 @@ export default function LoginScreen() {
       {/* Campo Senha */}
       <TextInput
         style={styles.input}
-        placeholder="Senha"
+        placeholder={t("password")}
         placeholderTextColor="#aaa"
         secureTextEntry
         value={senha}
@@ -119,14 +129,61 @@ export default function LoginScreen() {
         href="CadastrarScreen"
         style={{ marginTop: 20, color: "white", marginLeft: 150 }}
       >
-        Cadastre-se
+        {t("register")}
       </Link>
 
       <TouchableOpacity onPress={esqueceuSenha}>
         <Text style={{ marginTop: 20, color: "white", marginLeft: 130 }}>
-          Esqueceu a senha
+          {t("forgotpassword")}
         </Text>
       </TouchableOpacity>
+
+      <View style={{ flexDirection: "row" }}>
+        <TouchableOpacity
+          style={[styles.botao, { backgroundColor: "blue" }]}
+          onPress={() => mudarIdioma("en")}
+        >
+          <View style={{ flexDirection: "row" }}>
+            <Image
+              source={require("../assets/usa-icon.png")}
+              style={{
+                width: 50,
+                height: 50,
+              }}
+            ></Image>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.botao}
+          onPress={() => mudarIdioma("pt")}
+        >
+          <View style={{ flexDirection: "row" }}>
+            <Image
+              source={require("../assets/br-icon.png")}
+              style={{
+                width: 50,
+                height: 50,
+              }}
+            ></Image>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.botao, { backgroundColor: "yellow" }]}
+          onPress={() => mudarIdioma("es")}
+        >
+          <View style={{ flexDirection: "row" }}>
+            <Image
+              source={require("../assets/es-icon.png")}
+              style={{
+                width: 50,
+                height: 50,
+              }}
+            ></Image>
+          </View>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
