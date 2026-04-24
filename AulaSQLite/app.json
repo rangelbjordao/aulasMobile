@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "AulaSQLite",
-    "slug": "AulaSQLite",
+    "name": "AulaSQlite",
+    "slug": "AulaSQlite",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
